@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourierCSharp", "FourierCSharp\FourierCSharp.csproj", "{675E29FE-9F20-4E8E-B95C-9580B9D8B57A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{675E29FE-9F20-4E8E-B95C-9580B9D8B57A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{675E29FE-9F20-4E8E-B95C-9580B9D8B57A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{675E29FE-9F20-4E8E-B95C-9580B9D8B57A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{675E29FE-9F20-4E8E-B95C-9580B9D8B57A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {839A7FEE-FB8B-47E5-9F63-14D86DBD6622}
+	EndGlobalSection
+EndGlobal
