@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Diagnostics;
-
 
 // =====[ Revision History ]==========================================
 // 17Jun16 - 1.0 - First release - Steve Hageman
@@ -14,10 +13,8 @@ using System.Diagnostics;
 // 15Oct17 - 1.03.1 - Slight interoperability correction to V1.03, same results, different design pattern.
 //
 
-
 namespace DSPLib
 {
-
     #region =====[ DFT Core Class ]======================================================
 
     /**
@@ -54,7 +51,8 @@ namespace DSPLib
         /// <summary>
         /// DFT Class
         /// </summary>
-        public DFT() { }
+        public DFT()
+        { }
 
         #region Properties
 
@@ -66,7 +64,6 @@ namespace DSPLib
         private double[,] mSinTerm;      // on smaller DFT's
         private bool mOutOfMemory;       // True = Caching ran out of memory.
 
-        
         /// <summary>
         /// Read only Boolean property. True meas the currently defined DFT is using cached memory to speed up calculations.
         /// </summary>
@@ -76,7 +73,7 @@ namespace DSPLib
             get { return !mOutOfMemory; }
         }
 
-        #endregion
+        #endregion Properties
 
         #region Core DFT Routines
 
@@ -97,16 +94,15 @@ namespace DSPLib
             mDFTScale = Math.Sqrt(2) / (double)(inputDataLength + zeroPaddingLength);                 // Natural DFT Scale Factor                                           // Window Scale Factor
             mDFTScale *= ((double)(inputDataLength + zeroPaddingLength)) / (double)inputDataLength;   // Account For Zero Padding                           // Zero Padding Scale Factor
 
-
             if (forceNoCache == true)
             {
-                // If optional No Cache - just flag that the cache failed 
+                // If optional No Cache - just flag that the cache failed
                 // then the routines will use the brute force DFT methods.
                 mOutOfMemory = true;
                 return;
             }
 
-            // Try to make pre-calculated sin/cos arrays. If not enough memory, then 
+            // Try to make pre-calculated sin/cos arrays. If not enough memory, then
             // use a brute force DFT.
             // Note: pre-calculation speeds the DFT up by about 5X (on a core i7)
             mOutOfMemory = false;
@@ -135,7 +131,6 @@ namespace DSPLib
                 mOutOfMemory = true;
             }
         }
-
 
         /// <summary>
         /// Execute the DFT.
@@ -228,9 +223,9 @@ namespace DSPLib
             return result;
         }
 
-        #endregion
+        #endregion Private DFT Implementation details
 
-        #endregion
+        #endregion Core DFT Routines
 
         #region Utility Functions
 
@@ -252,13 +247,11 @@ namespace DSPLib
 
             return result;
         }
-
     }
 
-    #endregion
+    #endregion Utility Functions
 
-    #endregion
-
+    #endregion =====[ DFT Core Class ]======================================================
 
     #region =====[ FFT Core Class ]======================================================
 
@@ -271,12 +264,12 @@ namespace DSPLib
      *      Fast C# FFT - Copyright (c) 2010 Gerald T. Beauregard
      *
      * Changes to: Interface, scaling, zero padding, return values.
-     * Change to .NET Complex output types and integrated with my DSP Library. 
+     * Change to .NET Complex output types and integrated with my DSP Library.
      * Note: Complex Number Type requires .NET >= 4.0
-     * 
+     *
      * These changes as noted above Copyright (c) 2016 Steven C. Hageman
      *
-     * 
+     *
      * Permission is hereby granted, free of charge, to any person obtaining a copy
      * of this software and associated documentation files (the "Software"), to
      * deal in the Software without restriction, including without limitation the
@@ -296,7 +289,6 @@ namespace DSPLib
      * IN THE SOFTWARE.
      */
 
-
     /// <summary>
     /// FFT Base Class
     /// </summary>
@@ -305,7 +297,8 @@ namespace DSPLib
         /// <summary>
         /// FFT Class
         /// </summary>
-        public FFT() { }
+        public FFT()
+        { }
 
         #region Private Properties
 
@@ -325,7 +318,7 @@ namespace DSPLib
             public UInt32 revTgt;       // Target position post bit-reversal
         }
 
-        #endregion
+        #endregion Private Properties
 
         #region FFT Core Functions
 
@@ -375,7 +368,6 @@ namespace DSPLib
                 mX[k].revTgt = BitReverse(k, mLogN);
         }
 
-
         /// <summary>
         /// Executes a FFT of the input time series.
         /// </summary>
@@ -402,11 +394,11 @@ namespace DSPLib
             }
 
             // If zero padded, clean the 2nd half of the linked list from previous results
-            if( mN != mLengthTotal)
+            if (mN != mLengthTotal)
             {
                 for (UInt32 i = mN; i < mLengthTotal; i++)
                 {
-                    x.re = 0.0; 
+                    x.re = 0.0;
                     x.im = 0.0;
                     x = x.next;
                 }
@@ -507,6 +499,7 @@ namespace DSPLib
          * @param   x       Number to be bit-reverse.
          * @param   numBits Number of bits in the number.
          */
+
         private UInt32 BitReverse(UInt32 x, UInt32 numBits)
         {
             UInt32 y = 0;
@@ -519,9 +512,9 @@ namespace DSPLib
             return y;
         }
 
-        #endregion
+        #endregion Private FFT Routines
 
-        #endregion
+        #endregion FFT Core Functions
 
         #region Utility Functions
 
@@ -544,12 +537,10 @@ namespace DSPLib
             return result;
         }
 
-        #endregion
-
+        #endregion Utility Functions
     }
 
-    #endregion
-
+    #endregion =====[ FFT Core Class ]======================================================
 
     #region =====[ Generation, Conversion, Analysis and Array Manipulations ]============
 
@@ -579,7 +570,6 @@ namespace DSPLib
         * IN THE SOFTWARE.
         */
 
-
         #region Generate Signals & Noise
 
         public static class Generate
@@ -602,7 +592,6 @@ namespace DSPLib
 
                 return result;
             }
-
 
             /// <summary>
             /// Generates a Sine Wave Tone using Sampling Terms.
@@ -628,7 +617,6 @@ namespace DSPLib
                 return rval;
             }
 
-
             /// <summary>
             /// Generates a Sine Wave Tone using Number of Cycles Terms.
             /// </summary>
@@ -651,7 +639,6 @@ namespace DSPLib
                 return rval;
             }
 
-
             /// <summary>
             /// Generates a normal distribution noise signal of the specified power spectral density (Vrms / rt-Hz).
             /// </summary>
@@ -669,8 +656,6 @@ namespace DSPLib
 
                 return rval;
             }
-
-
 
             /// <summary>
             /// Generates a normal distribution noise signal of the specified Volts RMS.
@@ -699,7 +684,6 @@ namespace DSPLib
 
             private static double[] Noise(UInt32 size, double scaling_vrms)
             {
-
                 // Based on - Polar method (Marsaglia 1962)
 
                 // Scaling used,
@@ -747,11 +731,10 @@ namespace DSPLib
                 return data;
             }
 
-            #endregion
+            #endregion Private - Random Number Generator Core
         }
 
-        #endregion
-
+        #endregion Generate Signals & Noise
 
         #region Windows Functions & Scaling Functions
 
@@ -765,7 +748,7 @@ namespace DSPLib
         *
         *   G. Heinzel, A. Rudiger and R. Schilling,
         *   Max-Planck-Institut fur Gravitationsphysik
-        * 
+        *
         *   February 15, 2002
         *
         **/
@@ -835,7 +818,6 @@ namespace DSPLib
                     return 1.0 / s1;
                 }
 
-
                 /// <summary>
                 ///  Calculate Noise scale factor from window coefficient array.
                 ///  Takes into account the bin width in Hz for the final result also.
@@ -860,7 +842,6 @@ namespace DSPLib
                     return sf;
                 }
 
-
                 /// <summary>
                 ///  Calculate Normalized, Equivalent Noise BandWidth from window coefficient array.
                 /// </summary>
@@ -884,7 +865,8 @@ namespace DSPLib
                     return nenbw;
                 }
             }
-            #endregion
+
+            #endregion Window Scale Factor
 
             #region Window Coefficient Calculations
 
@@ -936,7 +918,7 @@ namespace DSPLib
                         break;
 
                     case Window.Type.BH92: // Also known as: Blackman-Harris
-                                 //wc = (0.35875 - 0.48829*cos(z) + 0.14128*cos(2*z) - 0.01168*cos(3*z));
+                                           //wc = (0.35875 - 0.48829*cos(z) + 0.14128*cos(2*z) - 0.01168*cos(3*z));
                         winCoeffs = SineExpansion(points, 0.35875, -0.48829, 0.14128, -0.01168);
                         break;
 
@@ -1109,12 +1091,10 @@ namespace DSPLib
                 return winCoeffs;
             }
 
-            #endregion
-
+            #endregion Window Coefficient Calculations
         }
 
-        #endregion
-
+        #endregion Windows Functions & Scaling Functions
 
         #region Convert Magnitude format to user friendly formats
 
@@ -1140,7 +1120,6 @@ namespace DSPLib
                 return mag2;
             }
 
-
             /// <summary>
             /// Convert Magnitude FT Result to: Magnitude dBVolts
             /// </summary>
@@ -1153,7 +1132,7 @@ namespace DSPLib
                 for (UInt32 i = 0; i < np; i++)
                 {
                     double magVal = magnitude[i];
-                    if(magVal <= 0.0)
+                    if (magVal <= 0.0)
                         magVal = double.Epsilon;
 
                     magDBV[i] = 20 * System.Math.Log10(magVal);
@@ -1161,11 +1140,9 @@ namespace DSPLib
 
                 return magDBV;
             }
-
         }
 
-        #endregion
-
+        #endregion Convert Magnitude format to user friendly formats
 
         #region Convert Magnitude Squared format to user friendly formats
 
@@ -1174,7 +1151,6 @@ namespace DSPLib
         /// </summary>
         public static class ConvertMagnitudeSquared
         {
-
             /// <summary>
             /// Convert Magnitude Squared FFT Result to: Magnitude Vrms
             /// </summary>
@@ -1214,8 +1190,7 @@ namespace DSPLib
             }
         }
 
-        #endregion
-
+        #endregion Convert Magnitude Squared format to user friendly formats
 
         #region Convert Complex format to user friendly formats
 
@@ -1242,7 +1217,6 @@ namespace DSPLib
                 return magSquared;
             }
 
-
             /// <summary>
             /// Convert Complex DFT/FFT Result to: Magnitude Vrms
             /// </summary>
@@ -1259,7 +1233,6 @@ namespace DSPLib
 
                 return mag;
             }
-
 
             /// <summary>
             /// Convert Complex DFT/FFT Result to: Log Magnitude dBV
@@ -1283,7 +1256,6 @@ namespace DSPLib
                 return mag;
             }
 
-
             /// <summary>
             /// Convert Complex DFT/FFT Result to: Phase in Degrees
             /// </summary>
@@ -1303,7 +1275,6 @@ namespace DSPLib
                 return phase;
             }
 
-
             /// <summary>
             /// Convert Complex DFT/FFT Result to: Phase in Radians
             /// </summary>
@@ -1321,8 +1292,8 @@ namespace DSPLib
                 return phase;
             }
         }
-        #endregion
 
+        #endregion Convert Complex format to user friendly formats
 
         #region Analyze Spectrum Data
 
@@ -1386,7 +1357,6 @@ namespace DSPLib
                 return sum / actualSumCount;
             }
 
-
             /// <summary>
             /// Finds the maximum value in an array.
             /// </summary>
@@ -1407,7 +1377,6 @@ namespace DSPLib
 
                 return maxVal;
             }
-
 
             /// <summary>
             /// Finds the position in the inData array where the maximum value happens.
@@ -1456,7 +1425,6 @@ namespace DSPLib
                 return fSpan[maxIndex];
             }
 
-
             /// <summary>
             /// Unwraps the phase so that it is continuous, without jumps.
             /// </summary>
@@ -1494,7 +1462,6 @@ namespace DSPLib
                 }
                 return unwrappedPhase;
             }
-
 
             /// <summary>
             /// Unwraps the phase so that it is continuous, without jumps.
@@ -1539,8 +1506,7 @@ namespace DSPLib
             }
         }
 
-        #endregion
-
+        #endregion Analyze Spectrum Data
 
         #region Double[] Array Math Operators
 
@@ -1549,7 +1515,6 @@ namespace DSPLib
         /// </summary>
         public static class Math
         {
-
             /// <summary>
             /// result[] = a[] * b[]
             /// </summary>
@@ -1709,12 +1674,10 @@ namespace DSPLib
 
                 return (DSP.Math.Subtract(a, mean));
             }
-
         }
 
-        #endregion
-
+        #endregion Double[] Array Math Operators
     }
-    #endregion
 
+    #endregion =====[ Generation, Conversion, Analysis and Array Manipulations ]============
 }

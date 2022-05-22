@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using DSPLib;
+using System;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Linq;
-
 using System.Numerics;
-using DSPLib;
-using PlotWrapper;
+using System.Text;
+using System.Windows.Forms;
 
 namespace FourierCSharp
 {
     public partial class MainForm : Form
     {
-        private string appName = " - Fourier Transform";
-        private static double[] inputSignal;
-        private static double[] lmSpectrum;
-        private static double[] freqSpan;
-        private static double samplingRate = 10.0; // trong 1s lấy 10 lần
+        private const string appName = " - Fourier Transform";
+        private static double[] inputSignal; // input data
+        private static double[] lmSpectrum; // output magnitude
+        private static double[] freqSpan; // output frequency
+        private const double samplingRate = 10; // 10 sample in 1s
+        private const double stepInSecond = 0.1;
+
         public MainForm()
         {
             InitializeComponent();
@@ -48,21 +43,18 @@ namespace FourierCSharp
             // Convert the complex spectrum to magnitude
             lmSpectrum = DSP.ConvertComplex.ToMagnitude(cSpectrum);
 
-            // For plotting on an XY Scatter plot, generate the X Axis frequency Span
             freqSpan = dft.FrequencySpan(samplingRate);
             DrawGraph();
 
-            // Find magnitude max then multify frequency with 60
             double maxValue = lmSpectrum.Max();
             int indexMax = lmSpectrum.ToList().IndexOf(maxValue);
 
-            // finded
-            if(indexMax != -1)
+            if (indexMax != -1)
             {
-                //Count the number of breaths in 1 second
+                //Count the number of breaths in 1 minute
                 var f = freqSpan[indexMax];
-                var totalBreathsInOneMininute = f != 0 ? f * 60 : 60;
-                MessageBox.Show("Số lần thở trong 1 phút của bạn là: " + totalBreathsInOneMininute);
+                var totalBreathsInOneMininute = Math.Ceiling(f * 60); // s -> minute
+                MessageBox.Show("" + totalBreathsInOneMininute + "", "Count breath in minute", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -76,12 +68,15 @@ namespace FourierCSharp
             var lines = System.IO.File.ReadAllLines(filename, Encoding.UTF8);
             if (inputSignal != null) inputSignal = null;
             inputSignal = new double[lines.Length];
-
+            var index = 0;
             for (int i = 0; i < lines.Length; i++)
             {
-                if (lines[i] == "") continue;
-                //var linesData = lines[i].Split(',');
-                inputSignal[i] = double.Parse(lines[i]) / 1000;
+                var check = double.TryParse(lines[i], out inputSignal[index]);
+                if (check)
+                {
+                    inputSignal[index] /= 1000; // convert ms -> s
+                    index++;
+                }
             }
         }
 
@@ -100,6 +95,7 @@ namespace FourierCSharp
             plot2.PlotData(freqSpan, lmSpectrum);
             plot2.Show();*/
         }
+
         private void DrawRealData()
         {
             if (inputSignal == null) return;
@@ -122,7 +118,7 @@ namespace FourierCSharp
 
             for (int i = 0; i < inputSignal.Length; i++)
             {
-                seriesIm.Points.AddXY(i * 0.2, inputSignal[i]);
+                seriesIm.Points.AddXY(i * stepInSecond, inputSignal[i]);
             }
         }
 
@@ -136,7 +132,7 @@ namespace FourierCSharp
             var ca = chtFourier.ChartAreas.Add("Fourier");
 
             chtFourier.Titles.Add("Fourier Transform");
-            ca.AxisX.Title = "Frequency (Hz)"; 
+            ca.AxisX.Title = "Frequency (Hz)";
             ca.AxisX.Minimum = 0;
             ca.AxisY.Title = "Magnitude";
             ca.AxisY.Minimum = 0;
@@ -161,33 +157,33 @@ namespace FourierCSharp
 
             dgv.Rows.Clear();
 
-            dgv.RowHeadersVisible = false;  
-            dgv.ColumnCount = 2;            
-            dgv.ReadOnly = true;           
+            dgv.RowHeadersVisible = false;
+            dgv.ColumnCount = 2;
+            dgv.ReadOnly = true;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;    
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;
 
             dgv.Columns[0].HeaderText = "Time (s)";
             dgv.Columns[1].HeaderText = "Input Data";
-
             for (int i = 0; i < inputSignal.Length; i++)
             {
-                dgv.Rows.Add(i * 0.2, inputSignal[i]);
+                dgv.Rows.Add(i * stepInSecond, inputSignal[i]);
             }
 
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; 
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
+
         private void SetDataGridViewDataOutput()
         {
             var dgv = dgvFourier;
             if (lmSpectrum == null || freqSpan == null) return;
             dgv.Rows.Clear();
 
-            dgv.RowHeadersVisible = false;  
-            dgv.ColumnCount = 2;            
-            dgv.ReadOnly = true;          
+            dgv.RowHeadersVisible = false;
+            dgv.ColumnCount = 2;
+            dgv.ReadOnly = true;
             dgv.EnableHeadersVisualStyles = false;
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;    
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;
 
             dgv.Columns[0].HeaderText = "Frequency (Hz)";
             dgv.Columns[1].HeaderText = "Magnitude";
