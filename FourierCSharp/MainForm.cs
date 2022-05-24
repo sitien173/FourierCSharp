@@ -1,9 +1,12 @@
 ﻿using DSPLib;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FourierCSharp
@@ -11,11 +14,12 @@ namespace FourierCSharp
     public partial class MainForm : Form
     {
         private const string appName = " - Fourier Transform";
+        private static double[] timeDomain;
         private static double[] inputSignal; // input data
         private static double[] lmSpectrum; // output magnitude
         private static double[] freqSpan; // output frequency
-        private const double samplingRate = 10; // 10 sample in 1s
-        private const double stepInSecond = 0.1;
+        private const double samplingRate = 50; // 50 sample in 1s
+        private static int IndexMaxMagnitude = 0;
 
         public MainForm()
         {
@@ -30,31 +34,26 @@ namespace FourierCSharp
             this.Text = System.IO.Path.GetFileName(ofd.FileName) + appName;
 
             LoadData(ofd.FileName);
-
-            // Instantiate a new DFT
             DFT dft = new DFT();
-
-            // Initialize the DFT
-            // You only need to do this once or if you change any of the DFT parameters.
             dft.Initialize((uint)inputSignal.Length);
-            // Call the DFT and get the scaled spectrum back
+            // Gọi DFT
             Complex[] cSpectrum = dft.Execute(inputSignal);
 
-            // Convert the complex spectrum to magnitude
+            // Chuyển complex sang magnitude
             lmSpectrum = DSP.ConvertComplex.ToMagnitude(cSpectrum);
-
+            // lấy tần số tương ứng với magnitude
             freqSpan = dft.FrequencySpan(samplingRate);
             DrawGraph();
 
-            double maxValue = lmSpectrum.Max();
-            int indexMax = lmSpectrum.ToList().IndexOf(maxValue);
+            double max = lmSpectrum.Max();
+            IndexMaxMagnitude = lmSpectrum.ToList().IndexOf(max);
 
-            if (indexMax != -1)
+            if (IndexMaxMagnitude != -1)
             {
-                //Count the number of breaths in 1 minute
-                var f = freqSpan[indexMax];
+                //đếm số nhịp thở trong 1 phút
+                var f = freqSpan[IndexMaxMagnitude];
                 var totalBreathsInOneMininute = Math.Ceiling(f * 60); // s -> minute
-                MessageBox.Show("" + totalBreathsInOneMininute + "", "Count breath in minute", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Số nhịp thở trong 1 phút là: " + totalBreathsInOneMininute + "", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -67,33 +66,41 @@ namespace FourierCSharp
         {
             var lines = System.IO.File.ReadAllLines(filename, Encoding.UTF8);
             if (inputSignal != null) inputSignal = null;
-            inputSignal = new double[lines.Length];
-            var index = 0;
+            var inputData = new List<double>();
+            var timeSeries = new List<double>();
+            var data = 0.0;
+            var time = 0.0;
             for (int i = 0; i < lines.Length; i++)
             {
-                var check = double.TryParse(lines[i], out inputSignal[index]);
-                if (check)
+                var line = lines[i].Split(',');
+                if(line.Length > 1)
                 {
-                    inputSignal[index] /= 1000; // convert ms -> s
-                    index++;
+                    var check = double.TryParse(line[0], out time);
+                    var check2 = double.TryParse(line[1], out data);
+
+                    if (check && check2)
+                    {
+                        data /= 1000; // convert ms -> s
+                        time /= 1000; // ~
+                        inputData.Add(data);
+                        timeSeries.Add(time);
+                    }
                 }
             }
+            inputSignal = inputData.ToArray();
+            timeDomain = timeSeries.ToArray();
         }
 
         private void DrawGraph()
         {
             if (inputSignal == null) return;
+
             DrawRealData();
             SetDataGridViewDataInput();
-            /*Plot plot1 = new Plot("Signal Time Domain", "Second (s)", "Input data");
-            plot1.PlotData(inputTimeDomain, inputSignal);
-            plot1.Show();*/
+
 
             DrawMagnitudeData();
             SetDataGridViewDataOutput();
-            /*Plot plot2 = new Plot("Signal frequency Domain", "Frequency (Hz)", "Magnitude");
-            plot2.PlotData(freqSpan, lmSpectrum);
-            plot2.Show();*/
         }
 
         private void DrawRealData()
@@ -118,7 +125,7 @@ namespace FourierCSharp
 
             for (int i = 0; i < inputSignal.Length; i++)
             {
-                seriesIm.Points.AddXY(i * stepInSecond, inputSignal[i]);
+                seriesIm.Points.AddXY(timeDomain[i], inputSignal[i]);
             }
         }
 
@@ -167,7 +174,7 @@ namespace FourierCSharp
             dgv.Columns[1].HeaderText = "Input Data";
             for (int i = 0; i < inputSignal.Length; i++)
             {
-                dgv.Rows.Add(i * stepInSecond, inputSignal[i]);
+                dgv.Rows.Add(timeDomain[i], inputSignal[i]);
             }
 
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -192,7 +199,7 @@ namespace FourierCSharp
             {
                 dgv.Rows.Add(freqSpan[i], lmSpectrum[i]);
             }
-
+            dgv.Rows[IndexMaxMagnitude].DefaultCellStyle.ForeColor = Color.Red;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
     }
