@@ -19,7 +19,6 @@ namespace FourierCSharp
         private static double[] lmSpectrum; // output magnitude
         private static double[] freqSpan; // output frequency
         private const double samplingRate = 50; // 50 sample in 1s
-        private static int IndexMaxMagnitude = 0;
 
         public MainForm()
         {
@@ -46,12 +45,12 @@ namespace FourierCSharp
             DrawGraph();
 
             double max = lmSpectrum.Max();
-            IndexMaxMagnitude = lmSpectrum.ToList().IndexOf(max);
+            var indexMaxMagnitude = lmSpectrum.ToList().IndexOf(max);
 
-            if (IndexMaxMagnitude != -1)
+            if (indexMaxMagnitude != -1)
             {
                 //đếm số nhịp thở trong 1 phút
-                var f = freqSpan[IndexMaxMagnitude];
+                var f = freqSpan[indexMaxMagnitude];
                 var totalBreathsInOneMininute = Math.Ceiling(f * 60); // s -> minute
                 MessageBox.Show("Số nhịp thở trong 1 phút là: " + totalBreathsInOneMininute + "", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -199,7 +198,6 @@ namespace FourierCSharp
             {
                 dgv.Rows.Add(freqSpan[i], lmSpectrum[i]);
             }
-            dgv.Rows[IndexMaxMagnitude].DefaultCellStyle.ForeColor = Color.Red;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
     }
